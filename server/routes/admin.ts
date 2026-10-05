@@ -1,9 +1,8 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../prisma.js';
 import { authenticate, requireRole } from '../middleware/auth';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // Get dashboard stats
 router.get('/dashboard', authenticate, requireRole('ADMIN'), async (req, res) => {

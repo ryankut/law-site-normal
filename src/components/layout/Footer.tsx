@@ -1,189 +1,165 @@
-import { Link } from 'react-router-dom';
-import { Scale, MapPin, Phone, Mail, Clock } from 'lucide-react';
+import React from 'react';
+import { Mail, Phone, ArrowUpRight, Heart } from 'lucide-react';
+import { Twitter, Instagram, Linkedin } from '@/components/icons/BrandIcons';
+import { Link, NavLink } from 'react-router-dom';
+import { NAV_LINKS } from '../../constants';
 
-const footerLinks = {
-  practiceAreas: [
-    { label: 'Personal Injury', href: '/practice-areas/personal-injury' },
-    { label: 'Family Law', href: '/practice-areas/family-law' },
-    { label: 'Criminal Defense', href: '/practice-areas/criminal-defense' },
-    { label: 'Business Law', href: '/practice-areas/business-law' },
-    { label: 'Estate Planning', href: '/practice-areas/estate-planning' },
-    { label: 'Real Estate', href: '/practice-areas/real-estate' },
-  ],
-  company: [
-    { label: 'About Us', href: '/about' },
-    { label: 'Our Team', href: '/about#team' },
-    { label: 'Case Results', href: '/case-results' },
-    { label: 'Testimonials', href: '/testimonials' },
-    { label: 'Blog', href: '/blog' },
-    { label: 'Careers', href: '/careers' },
-  ],
-  support: [
-    { label: 'Contact', href: '/contact' },
-    { label: 'Client Portal', href: '/portal' },
-    { label: 'FAQ', href: '/faq' },
-    { label: 'Privacy Policy', href: '/privacy' },
-    { label: 'Terms of Service', href: '/terms' },
-  ],
-};
-
-export function Footer() {
+const Footer: React.FC = () => {
   return (
-    <footer className="bg-slate-900 text-slate-300">
-      {/* Main Footer */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
-          {/* Brand Column */}
-          <div className="lg:col-span-2">
-            <Link to="/" className="flex items-center gap-3 mb-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
-                <Scale className="h-7 w-7 text-white" />
-              </div>
-              <div>
-                <span className="text-2xl font-bold text-white">
-                  Justice & Co.
-                </span>
-                <p className="text-sm text-slate-400">Attorneys at Law</p>
-              </div>
-            </Link>
-            
-            <p className="text-slate-400 mb-6 max-w-sm">
-              Providing exceptional legal services with integrity, professionalism, 
-              and a commitment to achieving the best possible outcomes for our clients.
-            </p>
+    <footer
+      className="bg-[#0F1E2E] text-[#F7F5F0] pt-12 pb-8 border-t border-white/5"
+      aria-labelledby="footer-heading"
+    >
+      <h2 id="footer-heading" className="sr-only">
+        Footer
+      </h2>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+          {/* Column 1: Contact */}
+          <div className="space-y-6 order-last lg:order-first">
+            <div>
+              <h3 className="text-sm font-bold serif mb-6 tracking-widest text-[#C6A75E] uppercase">
+                Contact
+              </h3>
+              <div className="space-y-4">
+                <a
+                  href="mailto:mfredebel@gmail.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-4 py-2 border-b border-white/5 hover:border-[#C6A75E]/30 transition-all"
+                  aria-label="Send me an email"
+                >
+                  <div className="w-8 h-8 bg-white/5 flex items-center justify-center rounded-sm group-hover:bg-[#C6A75E]/10">
+                    <Mail size={14} className="text-[#C6A75E]" />
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-white/60 uppercase tracking-[0.2em] font-bold">
+                      Email
+                    </span>
+                    <span className="block text-xs font-light group-hover:text-[#C6A75E] transition-colors font-sans">
+                      mfredebel@gmail.com
+                    </span>
+                  </div>
+                </a>
 
-            <div className="flex gap-4">
-              <a
-                href="#"
-                className="p-2 rounded-lg bg-slate-800 hover:bg-blue-600 transition-colors"
-                aria-label="Facebook"
-              >
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-              </a>
-              <a
-                href="#"
-                className="p-2 rounded-lg bg-slate-800 hover:bg-blue-600 transition-colors"
-                aria-label="LinkedIn"
-              >
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                </svg>
-              </a>
-              <a
-                href="#"
-                className="p-2 rounded-lg bg-slate-800 hover:bg-blue-600 transition-colors"
-                aria-label="Twitter"
-              >
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-              </a>
+                <a
+                  href="https://wa.me/2349065624016"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-4 py-2 border-b border-white/5 hover:border-[#C6A75E]/30 transition-all"
+                  aria-label="Chat with me on WhatsApp"
+                >
+                  <div className="w-8 h-8 bg-white/5 flex items-center justify-center rounded-sm group-hover:bg-[#C6A75E]/10">
+                    <Phone size={14} className="text-[#C6A75E]" />
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-white/60 uppercase tracking-[0.2em] font-bold">
+                      WhatsApp
+                    </span>
+                    <span className="block text-xs font-light group-hover:text-[#C6A75E] transition-colors font-sans">
+                      09065624016
+                    </span>
+                  </div>
+                </a>
+              </div>
             </div>
           </div>
 
-          {/* Practice Areas */}
-          <div>
-            <h3 className="text-white font-semibold mb-4">Practice Areas</h3>
-            <ul className="space-y-3">
-              {footerLinks.practiceAreas.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="text-slate-400 hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          {/* Column 2: Navigation */}
+          <div className="lg:pl-10">
+            <h3 className="text-sm font-bold serif mb-6 tracking-widest text-[#C6A75E] uppercase">
+              Quick Access
+            </h3>
+            <nav aria-label="Footer Quick Links">
+              <ul className="space-y-3">
+                {NAV_LINKS.map((link) => (
+                  <li key={link.name}>
+                    <NavLink
+                      to={link.href}
+                      className={({ isActive }) =>
+                        `text-xs transition-all duration-300 flex items-center group font-sans ${
+                          isActive ? 'text-[#C6A75E]' : 'text-[#F7F5F0]/70 hover:text-[#C6A75E]'
+                        }`
+                      }
+                    >
+                      {link.name}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           </div>
 
-          {/* Company */}
-          <div>
-            <h3 className="text-white font-semibold mb-4">Company</h3>
-            <ul className="space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    to={link.href}
-                    className="text-slate-400 hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          {/* Column 3: Legal & Privacy */}
+          <div className="lg:pl-5">
+            <h3 className="text-sm font-bold serif mb-6 tracking-widest text-[#C6A75E] uppercase">
+              Compliance
+            </h3>
+            <nav aria-label="Footer Compliance Links">
+              <ul className="space-y-3">
+                {[
+                  { name: 'Privacy Policy', href: '/privacy' },
+                  { name: 'Terms and Conditions', href: '/terms' },
+                  { name: 'Client Portal', href: '#' },
+                ].map((item) => (
+                  <li key={item.name}>
+                    <Link
+                      to={item.href}
+                      className="text-xs text-[#F7F5F0]/70 hover:text-[#C6A75E] transition-all duration-300 flex items-center justify-between group font-sans"
+                    >
+                      {item.name}
+                      <ArrowUpRight
+                        size={10}
+                        className="opacity-0 group-hover:opacity-60 transition-opacity"
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           </div>
 
-          {/* Contact Info */}
+          {/* Column 4: Engagement */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Contact Us</h3>
-            <ul className="space-y-4">
-              <li className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                <span className="text-slate-400">
-                  123 Legal Avenue, Suite 500<br />
-                  New York, NY 10001
-                </span>
-              </li>
-              <li className="flex items-center gap-3">
-                <Phone className="h-5 w-5 text-blue-500 flex-shrink-0" />
-                <a href="tel:+1234567890" className="text-slate-400 hover:text-white">
-                  (123) 456-7890
+            <h3 className="text-sm font-bold serif mb-6 tracking-widest text-[#C6A75E] uppercase">
+              Connect
+            </h3>
+            <div className="flex gap-3">
+              {[
+                { icon: Twitter, href: 'https://x.com/mfredebel', label: 'X' },
+                { icon: Linkedin, href: 'https://www.linkedin.com/in/fredebel-m-bab914282/', label: 'LinkedIn' },
+                { icon: Instagram, href: 'https://www.instagram.com/mfredebel/', label: 'Instagram' },
+              ].map((social, i) => (
+                <a
+                  key={i}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Visit my ${social.label} profile`}
+                  className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-[#C6A75E] hover:border-[#C6A75E] hover:text-[#0F1E2E] transition-all duration-500 rounded-sm"
+                >
+                  <social.icon size={16} />
                 </a>
-              </li>
-              <li className="flex items-center gap-3">
-                <Mail className="h-5 w-5 text-blue-500 flex-shrink-0" />
-                <a href="mailto:contact@justiceco.com" className="text-slate-400 hover:text-white">
-                  contact@justiceco.com
-                </a>
-              </li>
-              <li className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                <span className="text-slate-400">
-                  Mon - Fri: 9:00 AM - 6:00 PM
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Bar */}
-      <div className="border-t border-slate-800">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-slate-500">
-              © {new Date().getFullYear()} Justice & Co. All rights reserved.
-            </p>
-            <div className="flex gap-6 text-sm">
-              <Link to="/privacy" className="text-slate-500 hover:text-white transition-colors">
-                Privacy Policy
-              </Link>
-              <Link to="/terms" className="text-slate-500 hover:text-white transition-colors">
-                Terms of Service
-              </Link>
-              <Link to="/sitemap" className="text-slate-500 hover:text-white transition-colors">
-                Sitemap
-              </Link>
+              ))}
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Disclaimer */}
-      <div className="bg-slate-950 py-4">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <p className="text-xs text-slate-600 text-center">
-            Disclaimer: The information provided on this website is for general 
-            informational purposes only and does not constitute legal advice. 
-            Consultation with an attorney is necessary for advice regarding your 
-            individual situation.
+        {/* Bottom Bar: Copyright (Left) Credit (Right) */}
+        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 font-sans">
+          <p className="text-[9px] text-white/30 uppercase tracking-widest font-light order-2 md:order-1 text-center md:text-left">
+            &copy; 2026 Fredebel Menoh. All Rights Reserved.
           </p>
+
+          <div className="flex items-center gap-1.5 text-[8px] text-white/20 uppercase tracking-[0.3em] font-bold order-1 md:order-2">
+            <span>Partner with</span>
+            <Heart size={8} className="text-red-500 fill-red-500" />
+            <span>Cheruto & Nashali Advocates</span>
+          </div>
         </div>
       </div>
     </footer>
   );
-}
+};
+
+export default Footer;

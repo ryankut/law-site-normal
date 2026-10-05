@@ -1,9 +1,8 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../prisma.js';
 import { authenticate, AuthRequest, requireRole } from '../middleware/auth';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // Get all cases (admin only)
 router.get('/', authenticate, requireRole('ADMIN', 'ATTORNEY'), async (req, res) => {

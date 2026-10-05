@@ -1,7 +1,7 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from './prisma.js';
 import authRoutes from './routes/auth';
 import appointmentRoutes from './routes/appointments';
 import clientRoutes from './routes/clients';
@@ -9,9 +9,17 @@ import caseRoutes from './routes/cases';
 import paymentRoutes from './routes/payments';
 import documentRoutes from './routes/documents';
 import messageRoutes from './routes/messages';
-import blogRoutes from './routes/blog';
 import practiceAreaRoutes from './routes/practice-areas';
-import testimonialRoutes from './routes/testimonials';
+import matterTypeRoutes from './routes/matter-types';
+import teamMemberRoutes from './routes/team-members';
+import faqRoutes from './routes/faqs';
+import newsCategoryRoutes from './routes/news-categories';
+import newsArticleRoutes from './routes/news-articles';
+import clientLogoRoutes from './routes/client-logos';
+import resourceRoutes from './routes/resources';
+import newsletterRoutes from './routes/newsletter';
+import contactRoutes from './routes/contact';
+import settingsRoutes from './routes/settings';
 import adminRoutes from './routes/admin';
 import notificationRoutes from './routes/notifications';
 import uploadRoutes from './routes/upload';
@@ -19,7 +27,7 @@ import uploadRoutes from './routes/upload';
 dotenv.config();
 
 const app = express();
-const prisma = new PrismaClient();
+
 const PORT = process.env.PORT || 3001;
 
 // Middleware
@@ -29,6 +37,7 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use('/uploads', express.static('uploads'));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -43,13 +52,20 @@ app.use('/api/cases', caseRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/messages', messageRoutes);
-app.use('/api/blog', blogRoutes);
 app.use('/api/practice-areas', practiceAreaRoutes);
-app.use('/api/testimonials', testimonialRoutes);
+app.use('/api/matter-types', matterTypeRoutes);
+app.use('/api/team-members', teamMemberRoutes);
+app.use('/api/faqs', faqRoutes);
+app.use('/api/news-categories', newsCategoryRoutes);
+app.use('/api/news-articles', newsArticleRoutes);
+app.use('/api/client-logos', clientLogoRoutes);
+app.use('/api/resources', resourceRoutes);
+app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/settings', settingsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/upload', uploadRoutes);
-
 // Stripe webhook route
 app.use('/api/stripe', paymentRoutes);
 

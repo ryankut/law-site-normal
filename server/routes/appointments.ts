@@ -1,10 +1,9 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../prisma.js';
 import { authenticate, AuthRequest, requireRole } from '../middleware/auth';
 import nodemailer from 'nodemailer';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,

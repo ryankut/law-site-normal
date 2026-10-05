@@ -1,23 +1,20 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../prisma.js';
 import { authenticate, requireRole } from '../middleware/auth';
 
 const router = Router();
-const prisma = new PrismaClient();
 
-// Get all practice areas (public)
+// Get all top-level practice areas, with children (public)
 router.get('/', async (req, res) => {
   try {
     const practiceAreas = await prisma.practiceArea.findMany({
-      where: { isActive: true },
+      where: { isActive: true, parentId: null },
       orderBy: { sortOrder: 'asc' },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        description: true,
-        icon: true,
-        image: true,
+      include: {
+        children: {
+          where: { isActive: true },
+          orderBy: { sortOrder: 'asc' },
+        },
       },
     });
 
@@ -27,29 +24,34 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get single practice area
+// Get single practice area by slug, with children, parent, faqs, team members
 router.get('/:slug', async (req, res) => {
   try {
     const { slug } = req.params;
 
     const practiceArea = await prisma.practiceArea.findUnique({
       where: { slug },
+      include: {
+        parent: true,
+        children: {
+          where: { isActive: true },
+          orderBy: { sortOrder: 'asc' },
+        },
+        faqs: {
+          where: { isActive: true },
+          orderBy: { sortOrder: 'asc' },
+        },
+        teamMembers: {
+          include: { teamMember: true },
+        },
+      },
     });
 
     if (!practiceArea || !practiceArea.isActive) {
       return res.status(404).json({ error: 'Practice area not found' });
     }
 
-    // Get related testimonials
-    const testimonials = await prisma.testimonial.findMany({
-      where: {
-        isActive: true,
-        caseType: practiceArea.title,
-      },
-      take: 3,
-    });
-
-    res.json({ practiceArea, testimonials });
+    res.json(practiceArea);
   } catch (error) {
     res.status(500).json({ error: 'Failed to get practice area' });
   }
@@ -59,29 +61,29 @@ router.get('/:slug', async (req, res) => {
 router.post('/', authenticate, requireRole('ADMIN'), async (req, res) => {
   try {
     const {
+      parentId,
+      name,
       slug,
-      title,
-      description,
-      content,
-      icon,
-      image,
+      iconUrl,
+      imageUrl,
+      shortDesc,
+      body,
       metaTitle,
       metaDesc,
-      faqs,
       sortOrder,
     } = req.body;
 
     const practiceArea = await prisma.practiceArea.create({
       data: {
+        parentId: parentId || null,
+        name,
         slug,
-        title,
-        description,
-        content,
-        icon,
-        image,
+        iconUrl,
+        imageUrl,
+        shortDesc,
+        body,
         metaTitle,
         metaDesc,
-        faqs: faqs || [],
         sortOrder: sortOrder || 0,
       },
     });

@@ -122,3 +122,26 @@ html {
     scroll-behavior: auto;
   }
 }
+
+.public-site {
+  background-color: #0F1E2E;
+  color: #F7F5F0;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.public-site h1,
+.public-site h2,
+.public-site h3,
+.public-site h4,
+.public-site .serif {
+  font-family: 'Playfair Display', serif;
+}
+
+.public-site .mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.public-site section {
+  position: relative;
+  margin-top: -1px;
+}

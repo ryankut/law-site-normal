@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+export const API_ORIGIN = API_URL.replace(/\/api\/?$/, '');
 
 const api = axios.create({
   baseURL: API_URL,
@@ -100,14 +101,7 @@ export const paymentAPI = {
   getMyPayments: () => api.get('/payments/my-payments'),
 };
 
-// Blog
-export const blogAPI = {
-  getAll: (params?: any) => api.get('/blog', { params }),
-  getBySlug: (slug: string) => api.get(`/blog/${slug}`),
-  create: (data: any) => api.post('/blog', data),
-  update: (id: string, data: any) => api.put(`/blog/${id}`, data),
-  delete: (id: string) => api.delete(`/blog/${id}`),
-};
+
 
 // Practice Areas
 export const practiceAreaAPI = {
@@ -118,13 +112,86 @@ export const practiceAreaAPI = {
   delete: (id: string) => api.delete(`/practice-areas/${id}`),
 };
 
-// Testimonials
-export const testimonialAPI = {
-  getAll: (params?: any) => api.get('/testimonials', { params }),
-  getFeatured: () => api.get('/testimonials/featured'),
-  create: (data: any) => api.post('/testimonials', data),
-  update: (id: string, data: any) => api.put(`/testimonials/${id}`, data),
-  delete: (id: string) => api.delete(`/testimonials/${id}`),
+// Matter Types
+export const matterTypeAPI = {
+  getAll: (params?: any) => api.get('/matter-types', { params }),
+  create: (data: any) => api.post('/matter-types', data),
+  update: (id: string, data: any) => api.put(`/matter-types/${id}`, data),
+  delete: (id: string) => api.delete(`/matter-types/${id}`),
+};
+
+// Team Members
+export const teamMemberAPI = {
+  getAll: () => api.get('/team-members'),
+  getById: (id: string) => api.get(`/team-members/${id}`),
+  create: (data: any) => api.post('/team-members', data),
+  update: (id: string, data: any) => api.put(`/team-members/${id}`, data),
+  delete: (id: string) => api.delete(`/team-members/${id}`),
+  attachPracticeArea: (id: string, practiceAreaId: string) =>
+    api.post(`/team-members/${id}/practice-areas`, { practiceAreaId }),
+  detachPracticeArea: (id: string, practiceAreaId: string) =>
+    api.delete(`/team-members/${id}/practice-areas/${practiceAreaId}`),
+};
+
+// FAQs
+export const faqAPI = {
+  getAll: (params?: any) => api.get('/faqs', { params }),
+  create: (data: any) => api.post('/faqs', data),
+  update: (id: string, data: any) => api.put(`/faqs/${id}`, data),
+  delete: (id: string) => api.delete(`/faqs/${id}`),
+};
+
+// News Categories
+export const newsCategoryAPI = {
+  getAllAdmin: () => api.get('/news-categories'),
+  create: (data: any) => api.post('/news-categories', data),
+  update: (id: string, data: any) => api.put(`/news-categories/${id}`, data),
+  delete: (id: string) => api.delete(`/news-categories/${id}`),
+};
+
+// News Articles
+export const newsArticleAPI = {
+  getAll: (params?: any) => api.get('/news-articles', { params }),
+  getAllAdmin: () => api.get('/news-articles/admin/all'),
+  getBySlug: (slug: string) => api.get(`/news-articles/${slug}`),
+  create: (data: any) => api.post('/news-articles', data),
+  update: (id: string, data: any) => api.put(`/news-articles/${id}`, data),
+  delete: (id: string) => api.delete(`/news-articles/${id}`),
+};
+
+// Client Logos
+export const clientLogoAPI = {
+  getAll: () => api.get('/client-logos'),
+  create: (data: any) => api.post('/client-logos', data),
+  update: (id: string, data: any) => api.put(`/client-logos/${id}`, data),
+  delete: (id: string) => api.delete(`/client-logos/${id}`),
+};
+
+// Resources
+export const resourceAPI = {
+  getAll: () => api.get('/resources'),
+  create: (data: any) => api.post('/resources', data),
+  update: (id: string, data: any) => api.put(`/resources/${id}`, data),
+  delete: (id: string) => api.delete(`/resources/${id}`),
+};
+
+// Newsletter Subscribers
+export const newsletterAPI = {
+  getAll: () => api.get('/newsletter'),
+  delete: (id: string) => api.delete(`/newsletter/${id}`),
+};
+
+// Contact Submissions
+export const contactSubmissionAPI = {
+  getAll: () => api.get('/contact'),
+  markRead: (id: string) => api.put(`/contact/${id}/read`),
+};
+
+// Firm Settings (singleton — distinct from adminAPI.getSettings/updateSettings,
+// which hits the older generic SiteSettings key-value model)
+export const firmSettingsAPI = {
+  get: () => api.get('/settings'),
+  update: (data: any) => api.put('/settings', data),
 };
 
 // Documents
@@ -156,6 +223,24 @@ export const notificationAPI = {
   getAll: (params?: any) => api.get('/notifications', { params }),
   markAsRead: (id: string) => api.put(`/notifications/${id}/read`),
   markAllAsRead: () => api.put('/notifications/read-all'),
+};
+
+// File uploads
+export const uploadAPI = {
+  uploadFile: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    // Content-Type must be unset (not just changed) here — this axios instance
+    // defaults to 'application/json' globally, and setting it to undefined
+    // lets the browser generate the correct multipart boundary itself.
+    const res = await api.post('/upload', formData, {
+      headers: { 'Content-Type': undefined },
+    });
+    // Backend returns a relative path like "/uploads/xyz.png" — resolve it
+    // to an absolute URL immediately so every consumer of this value (admin
+    // previews, and later the public site) can use it directly.
+    return { ...res, data: { ...res.data, url: `${API_ORIGIN}${res.data.url}` } };
+  },
 };
 
 export default api;

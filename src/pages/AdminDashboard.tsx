@@ -1,272 +1,252 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { 
-  Users, Calendar, FileText, DollarSign, TrendingUp,
-  ChevronRight, Bell, Settings, BarChart3, Briefcase 
+import {
+  Briefcase, Newspaper, FileBox, Users, HelpCircle, Image, Mail,
+  MessageSquare, CheckCircle2, XCircle, ArrowRight,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { useAuthStore } from '@/store/authStore';
+import {
+  practiceAreaAPI, newsArticleAPI, resourceAPI, teamMemberAPI,
+  faqAPI, clientLogoAPI, newsletterAPI, contactSubmissionAPI, adminAPI,
+} from '@/lib/api';
 
-const stats = [
-  { label: 'Total Clients', value: '245', change: '+12%', icon: Users, color: 'blue' },
-  { label: 'Active Cases', value: '38', change: '+5%', icon: Briefcase, color: 'amber' },
-  { label: 'Appointments', value: '12', change: '+8%', icon: Calendar, color: 'green' },
-  { label: 'Revenue', value: '$48,500', change: '+15%', icon: DollarSign, color: 'purple' },
-];
+interface Counts {
+  practiceAreas: number;
+  articles: number;
+  resources: number;
+  teamMembers: number;
+  faqs: number;
+  clientLogos: number;
+  subscribers: number;
+  messages: number;
+  unreadMessages: number;
+}
 
-const recentClients = [
-  { id: 1, name: 'Sarah Johnson', case: 'Personal Injury', status: 'Active', date: '2024-01-20' },
-  { id: 2, name: 'Michael Chen', case: 'Business Law', status: 'Pending', date: '2024-01-19' },
-  { id: 3, name: 'Emily Rodriguez', case: 'Family Law', status: 'Active', date: '2024-01-18' },
-];
-
-const upcomingAppointments = [
-  { id: 1, client: 'David Smith', type: 'Case Review', time: '10:00 AM', date: 'Today' },
-  { id: 2, client: 'Lisa Wang', type: 'Initial Consultation', time: '2:00 PM', date: 'Today' },
-  { id: 3, client: 'Robert Brown', type: 'Follow-up', time: '11:00 AM', date: 'Tomorrow' },
-];
+const EMPTY_COUNTS: Counts = {
+  practiceAreas: 0, articles: 0, resources: 0, teamMembers: 0,
+  faqs: 0, clientLogos: 0, subscribers: 0, messages: 0, unreadMessages: 0,
+};
 
 export function AdminDashboard() {
-  const { user } = useAuthStore();
+  const [counts, setCounts] = useState<Counts>(EMPTY_COUNTS);
+  const [recentAppointments, setRecentAppointments] = useState<any[]>([]);
+  const [recentMessages, setRecentMessages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = 'Admin Dashboard | Justice & Co.';
+    async function load() {
+      try {
+        const [
+          practiceAreasRes, articlesRes, resourcesRes, teamMembersRes,
+          faqsRes, clientLogosRes, subscribersRes, messagesRes, dashboardRes,
+        ] = await Promise.all([
+          practiceAreaAPI.getAll(),
+          newsArticleAPI.getAllAdmin(),
+          resourceAPI.getAll(),
+          teamMemberAPI.getAll(),
+          faqAPI.getAll(),
+          clientLogoAPI.getAll(),
+          newsletterAPI.getAll(),
+          contactSubmissionAPI.getAll(),
+          adminAPI.getDashboard(),
+        ]);
+
+        // practiceAreaAPI.getAll() returns only top-level areas with nested children
+        const practiceAreaCount = practiceAreasRes.data.reduce(
+          (sum: number, p: any) => sum + 1 + (p.children?.length || 0),
+          0
+        );
+
+        const unread = messagesRes.data.filter((m: any) => !m.isRead).length;
+
+        setCounts({
+          practiceAreas: practiceAreaCount,
+          articles: articlesRes.data.length,
+          resources: resourcesRes.data.length,
+          teamMembers: teamMembersRes.data.length,
+          faqs: faqsRes.data.length,
+          clientLogos: clientLogosRes.data.length,
+          subscribers: subscribersRes.data.length,
+          messages: messagesRes.data.length,
+          unreadMessages: unread,
+        });
+
+        setRecentMessages(messagesRes.data.slice(0, 5));
+        setRecentAppointments(dashboardRes.data?.recentAppointments || []);
+      } catch (err) {
+        // Individual sections degrade gracefully to zero counts / empty lists
+        // rather than blocking the whole dashboard on one failed call.
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
   }, []);
 
+  const mgmtRows = [
+    {
+      label: 'Practice Areas', icon: Briefcase, count: counts.practiceAreas,
+      unit: counts.practiceAreas === 1 ? 'Practice Area' : 'Practice Areas',
+      to: '/admin/practice-areas', desc: "Manage the firm's legal service offerings.",
+    },
+    {
+      label: 'Articles', icon: Newspaper, count: counts.articles,
+      unit: counts.articles === 1 ? 'Article' : 'Articles',
+      to: '/admin/news-articles', desc: 'Publish news, updates, and legal insights.',
+    },
+    {
+      label: 'Resources', icon: FileBox, count: counts.resources,
+      unit: counts.resources === 1 ? 'Resource' : 'Resources',
+      to: '/admin/resources', desc: 'Downloadable documents and resource files.',
+    },
+    {
+      label: 'Team Members', icon: Users, count: counts.teamMembers,
+      unit: counts.teamMembers === 1 ? 'Member' : 'Members',
+      to: '/admin/team-members', desc: 'Advocate profiles shown on the team page.',
+    },
+    {
+      label: 'FAQs', icon: HelpCircle, count: counts.faqs,
+      unit: counts.faqs === 1 ? 'FAQ' : 'FAQs',
+      to: '/admin/faqs', desc: 'Frequently asked questions by practice area.',
+    },
+    {
+      label: 'Client Logos', icon: Image, count: counts.clientLogos,
+      unit: counts.clientLogos === 1 ? 'Logo' : 'Logos',
+      to: '/admin/client-logos', desc: 'Client logos displayed on the website.',
+    },
+    {
+      label: 'Subscribers', icon: Mail, count: counts.subscribers,
+      unit: counts.subscribers === 1 ? 'Subscriber' : 'Subscribers',
+      to: '/admin/newsletter', desc: 'Newsletter subscriber list.',
+    },
+  ];
+
+  const statusItems = [
+    { label: 'Team Members', ok: counts.teamMembers > 0, detail: `${counts.teamMembers} published` },
+    { label: 'Practice Areas', ok: counts.practiceAreas > 0, detail: `${counts.practiceAreas} listed` },
+    { label: 'Articles', ok: counts.articles > 0, detail: `${counts.articles} total` },
+    { label: 'Resources', ok: counts.resources > 0, detail: `${counts.resources} uploaded` },
+    { label: 'Client Logos', ok: counts.clientLogos > 0, detail: `${counts.clientLogos} logos` },
+  ];
+
+  if (loading) {
+    return <div className="p-8 text-slate-500">Loading dashboard...</div>;
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+    <div className="p-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
+        <p className="text-slate-500 text-sm mt-1">Welcome back. Manage your firm's content from here.</p>
+      </div>
+
+      {/* Management rows */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        {mgmtRows.map((row) => (
+          <Link
+            key={row.to}
+            to={row.to}
+            className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700 transition-colors"
           >
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-              Dashboard
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400">
-              Welcome back, {user?.firstName || 'Admin'}
-            </p>
-          </motion.div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
-              <Bell className="h-4 w-4 mr-2" />
-              Notifications
-            </Button>
-            <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Button>
+            <div className="p-2.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+              <row.icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-slate-900 dark:text-white text-sm">{row.label}</p>
+              <p className="text-xs text-slate-500 truncate">{row.desc}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold text-slate-900 dark:text-white">{row.count}</p>
+              <p className="text-xs text-slate-400">{row.unit}</p>
+            </div>
+            <ArrowRight className="h-4 w-4 text-slate-300 flex-shrink-0" />
+          </Link>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Website status */}
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
+          <h2 className="font-semibold text-slate-900 dark:text-white mb-4">Website Status</h2>
+          <div className="space-y-3">
+            {statusItems.map((item) => (
+              <div key={item.label} className="flex items-center gap-2 text-sm">
+                {item.ok ? (
+                  <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                ) : (
+                  <XCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
+                )}
+                <span className="text-slate-700 dark:text-slate-300">{item.label}</span>
+                <span className={item.ok ? 'text-slate-400' : 'text-red-500'}>
+                  — {item.ok ? item.detail : 'No entries yet'}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {stats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">
-                        {stat.label}
-                      </p>
-                      <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-                        {stat.value}
-                      </p>
-                    </div>
-                    <div className={`w-12 h-12 rounded-xl bg-${stat.color}-100 dark:bg-${stat.color}-900/30 flex items-center justify-center`}>
-                      <stat.icon className={`h-6 w-6 text-${stat.color}-600 dark:text-${stat.color}-400`} />
-                    </div>
-                  </div>
-                  <div className="mt-4 flex items-center text-sm">
-                    <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                    <span className="text-green-600 font-medium">{stat.change}</span>
-                    <span className="text-slate-500 ml-1">vs last month</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Recent Clients */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <CardTitle className="text-lg">Recent Clients</CardTitle>
-                <Link to="/admin/clients">
-                  <Button variant="ghost" size="sm">
-                    View All
-                    <ChevronRight className="ml-1 h-4 w-4" />
-                  </Button>
-                </Link>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-slate-200 dark:border-slate-800">
-                        <th className="text-left py-3 text-sm font-medium text-slate-600 dark:text-slate-400">Name</th>
-                        <th className="text-left py-3 text-sm font-medium text-slate-600 dark:text-slate-400">Case Type</th>
-                        <th className="text-left py-3 text-sm font-medium text-slate-600 dark:text-slate-400">Status</th>
-                        <th className="text-left py-3 text-sm font-medium text-slate-600 dark:text-slate-400">Date</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {recentClients.map((client) => (
-                        <tr key={client.id} className="border-b border-slate-100 dark:border-slate-800 last:border-0">
-                          <td className="py-3 text-slate-900 dark:text-white font-medium">{client.name}</td>
-                          <td className="py-3 text-slate-600 dark:text-slate-400 text-sm">{client.case}</td>
-                          <td className="py-3">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              client.status === 'Active' 
-                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-                            }`}>
-                              {client.status}
-                            </span>
-                          </td>
-                          <td className="py-3 text-slate-500 text-sm">{new Date(client.date).toLocaleDateString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Revenue Chart Placeholder */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <CardTitle className="text-lg">Revenue Overview</CardTitle>
-                <select className="text-sm border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1 bg-white dark:bg-slate-800">
-                  <option>Last 30 days</option>
-                  <option>Last 90 days</option>
-                  <option>This year</option>
-                </select>
-              </CardHeader>
-              <CardContent>
-                <div className="h-64 flex items-center justify-center bg-slate-50 dark:bg-slate-800 rounded-xl">
-                  <div className="text-center">
-                    <BarChart3 className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                    <p className="text-slate-500">Revenue chart will be displayed here</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        {/* Recent messages */}
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Recent Messages
+              {counts.unreadMessages > 0 && (
+                <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                  {counts.unreadMessages} unread
+                </span>
+              )}
+            </h2>
+            <Link to="/admin/contact" className="text-xs text-blue-600 font-medium">
+              View all
+            </Link>
           </div>
-
-          {/* Right Column */}
-          <div className="space-y-8">
-            {/* Upcoming Appointments */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <CardTitle className="text-lg">Today's Schedule</CardTitle>
-                <Link to="/admin/appointments">
-                  <Button variant="ghost" size="sm">
-                    View All
-                    <ChevronRight className="ml-1 h-4 w-4" />
-                  </Button>
-                </Link>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {upcomingAppointments.map((apt) => (
-                    <div key={apt.id} className="flex items-start gap-4 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                      <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-                        <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-slate-900 dark:text-white text-sm">
-                          {apt.client}
-                        </p>
-                        <p className="text-sm text-slate-500">{apt.type}</p>
-                        <p className="text-xs text-blue-600 mt-1">{apt.time} • {apt.date}</p>
-                      </div>
-                    </div>
-                  ))}
+          {recentMessages.length === 0 ? (
+            <p className="text-sm text-slate-400">No messages yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {recentMessages.map((m) => (
+                <div key={m.id} className="flex items-center justify-between text-sm">
+                  <div className="min-w-0">
+                    <p
+                      className="text-slate-900 dark:text-white truncate"
+                      style={{ fontWeight: m.isRead ? 400 : 600 }}
+                    >
+                      {m.fullName}
+                    </p>
+                    <p className="text-xs text-slate-500 truncate">{m.subject || '—'}</p>
+                  </div>
+                  <span className="text-xs text-slate-400 flex-shrink-0 ml-2">
+                    {new Date(m.submittedAt).toLocaleDateString()}
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Link to="/admin/clients/new">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Users className="mr-2 h-4 w-4" />
-                    Add New Client
-                  </Button>
-                </Link>
-                <Link to="/admin/appointments/new">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    Schedule Appointment
-                  </Button>
-                </Link>
-                <Link to="/admin/blog/new">
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="mr-2 h-4 w-4" />
-                    Write Blog Post
-                  </Button>
-                </Link>
-                <Link to="/admin/invoices/new">
-                  <Button variant="outline" className="w-full justify-start">
-                    <DollarSign className="mr-2 h-4 w-4" />
-                    Create Invoice
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            {/* Tasks */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Pending Tasks</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <input type="checkbox" className="mt-1 rounded border-slate-300" />
-                    <div>
-                      <p className="text-sm text-slate-900 dark:text-white">Review Smith case documents</p>
-                      <p className="text-xs text-slate-500">Due today</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <input type="checkbox" className="mt-1 rounded border-slate-300" />
-                    <div>
-                      <p className="text-sm text-slate-900 dark:text-white">Prepare for tomorrow's deposition</p>
-                      <p className="text-xs text-slate-500">Due tomorrow</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <input type="checkbox" className="mt-1 rounded border-slate-300" />
-                    <div>
-                      <p className="text-sm text-slate-900 dark:text-white">Send settlement offer</p>
-                      <p className="text-xs text-slate-500">Due in 2 days</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              ))}
+            </div>
+          )}
         </div>
+      </div>
+
+      {/* Recent appointments */}
+      <div className="mt-6 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
+        <h2 className="font-semibold text-slate-900 dark:text-white mb-4">Recent Consultation Requests</h2>
+        {recentAppointments.length === 0 ? (
+          <p className="text-sm text-slate-400">No consultation requests yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {recentAppointments.map((a: any) => (
+              <div key={a.id} className="flex items-center justify-between text-sm">
+                <div>
+                  <p className="text-slate-900 dark:text-white font-medium">
+                    {a.client?.firstName} {a.client?.lastName}
+                  </p>
+                  <p className="text-xs text-slate-500">{a.client?.email}</p>
+                </div>
+                <span className="text-xs text-slate-400">
+                  {new Date(a.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

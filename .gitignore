@@ -58,3 +58,5 @@ coverage
 .cache
 .parcel-cache
 *.tsbuildinfo
+
+src/generated/
