@@ -3,6 +3,7 @@ import { Phone, Mail, MapPin, CheckCircle2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { contactSchema, ContactFormData } from '../../types';
+import { postJson } from '../../services/contentService';
 
 interface ContactSectionProps {
   variant?: 'white' | 'blue';
@@ -21,13 +22,23 @@ const ContactSection: React.FC<ContactSectionProps> = ({ variant = 'white' }) =>
     resolver: zodResolver(contactSchema)
   });
 
+  const [submitError, setSubmitError] = useState(false);
+
   const onSubmit = async (data: ContactFormData) => {
-    // Simulate API call
-    console.log('Form data:', data);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsSubmitted(true);
-    reset();
-    setTimeout(() => setIsSubmitted(false), 5000);
+    setSubmitError(false);
+    try {
+      await postJson('/api/contact', {
+        fullName: data.fullName,
+        email: data.email,
+        subject: data.category,
+        message: data.message,
+      });
+      setIsSubmitted(true);
+      reset();
+      setTimeout(() => setIsSubmitted(false), 5000);
+    } catch {
+      setSubmitError(true);
+    }
   };
 
   return (
@@ -177,6 +188,11 @@ const ContactSection: React.FC<ContactSectionProps> = ({ variant = 'white' }) =>
                 >
                   {isSubmitting ? 'Transmitting...' : 'Request Appointment'}
                 </button>
+                {submitError && (
+                  <p className="text-center text-[10px] text-red-500 font-bold uppercase tracking-wider">
+                    Something went wrong. Please try again.
+                  </p>
+                )}
               </form>
             )}
           </div>

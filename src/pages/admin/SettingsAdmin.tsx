@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { firmSettingsAPI } from '@/lib/api';
+import { firmSettingsAPI, uploadAPI } from '@/lib/api';
 
-const FIELDS: { name: string; label: string }[] = [
+type FieldDef = { name: string; label: string; type?: 'text' | 'file' };
+
+const FIELDS: FieldDef[] = [
   { name: 'firmName', label: 'Firm Name' },
   { name: 'tagline', label: 'Tagline' },
-  { name: 'logoUrl', label: 'Logo URL' },
-  { name: 'faviconUrl', label: 'Favicon URL' },
+  { name: 'logoUrl', label: 'Logo', type: 'file' },
+  { name: 'faviconUrl', label: 'Favicon', type: 'file' },
   { name: 'email', label: 'Email' },
   { name: 'phone', label: 'Phone' },
   { name: 'facebookUrl', label: 'Facebook URL' },
@@ -32,6 +34,18 @@ export function SettingsAdmin() {
   const handleChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     setSaved(false);
+  };
+
+    const [uploading, setUploading] = useState<Record<string, boolean>>({});
+
+  const handleFileUpload = async (name: string, file: File) => {
+    setUploading((prev) => ({ ...prev, [name]: true }));
+    try {
+      const res = await uploadAPI.uploadFile(file);
+      handleChange(name, res.data.url);
+    } finally {
+      setUploading((prev) => ({ ...prev, [name]: false }));
+    }
   };
 
   const handleSave = async () => {
@@ -61,12 +75,36 @@ export function SettingsAdmin() {
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
               {field.label}
             </label>
-            <input
-              type="text"
-              value={formData[field.name] ?? ''}
-              onChange={(e) => handleChange(field.name, e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-sm"
-            />
+            {field.type === 'file' ? (
+              <div>
+                {formData[field.name] && (
+                  <img
+                    src={formData[field.name]}
+                    alt=""
+                    className="w-20 h-20 object-contain rounded-lg border border-slate-200 dark:border-slate-700 mb-2 bg-white"
+                  />
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileUpload(field.name, file);
+                  }}
+                  className="text-sm"
+                />
+                {uploading[field.name] && (
+                  <p className="text-xs text-slate-400 mt-1">Uploading...</p>
+                )}
+              </div>
+            ) : (
+              <input
+                type="text"
+                value={formData[field.name] ?? ''}
+                onChange={(e) => handleChange(field.name, e.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-sm"
+              />
+            )}
           </div>
         ))}
 

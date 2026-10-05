@@ -6,7 +6,7 @@ export function NewsCategoriesAdmin() {
     <AdminCrudPage
       title="News Categories"
       description="Manage the categories articles can be organized under."
-      fetchAll={() => newsCategoryAPI.getAll()}
+      fetchAll={() => newsCategoryAPI.getAllAdmin()}
       onCreate={(data) => newsCategoryAPI.create(data)}
       onUpdate={(id, data) => newsCategoryAPI.update(id, data)}
       onDelete={(id) => newsCategoryAPI.delete(id)}

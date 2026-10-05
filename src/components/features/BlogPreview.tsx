@@ -74,13 +74,13 @@ const BlogPreview: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
                   <div className="overflow-hidden aspect-video bg-white/5 relative">
                     <img
-                      src={featuredPost.imageUrl}
+                      src={featuredPost.featuredImage || ''}
                       alt={featuredPost.title}
                       className="w-full h-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
                     />
                     <div className="absolute top-4 left-4">
                       <span className="px-3 py-1 bg-[#C6A75E] text-[#0F1E2E] text-[8px] font-bold uppercase tracking-widest">
-                        {featuredPost.category}
+                        {featuredPost.category?.name || 'Insight'}
                       </span>
                     </div>
                   </div>
@@ -96,9 +96,13 @@ const BlogPreview: React.FC = () => {
                       {featuredPost.excerpt}
                     </p>
                     <div className="flex items-center text-[10px] text-white/40 pt-4 tracking-widest uppercase font-bold">
-                      <span>{featuredPost.author}</span>
+                      <span>{featuredPost.author?.fullName || 'Firm Staff'}</span>
                       <span className="mx-3 opacity-30">-</span>
-                      <span>{featuredPost.date}</span>
+                      <span>
+                        {featuredPost.publishedAt
+                          ? new Date(featuredPost.publishedAt).toLocaleDateString()
+                          : ''}
+                      </span>
                     </div>
                   </div>
                 </div>

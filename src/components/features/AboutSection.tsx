@@ -11,7 +11,7 @@ const AboutSection: React.FC = () => {
             <div className="absolute -top-10 -left-10 w-24 md:w-40 h-24 md:h-40 bg-[#C6A75E]/5 rounded-full -z-10"></div>
             <div className="relative z-10 group">
               <img
-                src="../../assets/images/cherutoandnashali.png"
+                src="assets/images/cherutoandnashali.png"
                 alt="Photo of firm advocates"
                 className="w-full h-100 md:h-150 object-cover rounded-sm shadow-[0_35px_60px_-15px_rgba(15,30,46,0.2)] transition-all duration-1000"
               />

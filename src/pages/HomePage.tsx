@@ -1,6 +1,11 @@
 import React, { useCallback } from 'react';
-import { ArrowRight, Briefcase } from 'lucide-react';
+import { Briefcase, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Hero from '../components/features/Hero';
+import AboutSection from '../components/features/AboutSection';
+import FAQ from '../components/features/FAQ';
+import BlogPreview from '../components/features/BlogPreview';
+import ContactSection from '../components/features/ContactSection';
 import { useContent } from '../hooks/useContent';
 import { contentService } from '../services/contentService';
 
@@ -8,58 +13,17 @@ const HomePage: React.FC = () => {
   const fetchPracticeAreas = useCallback(() => contentService.getPracticeAreas(), []);
   const { data: practiceAreas, loading: areasLoading } = useContent(fetchPracticeAreas);
 
+  const featuredAreas = (practiceAreas ?? []).slice(0, 3);
+
   const fetchClientLogos = useCallback(() => contentService.getTestimonials(), []);
   const { data: clientLogos, loading: logosLoading } = useContent(fetchClientLogos);
-
-  const featuredAreas = (practiceAreas ?? []).slice(0, 3);
   const hasClientLogos = (clientLogos?.length ?? 0) > 0;
 
   return (
     <div className="bg-[#F7F5F0]">
-      {/* Hero */}
-      <section className="relative min-h-screen w-full overflow-hidden flex flex-col items-center justify-center text-center px-6">
-        <div className="absolute inset-0 z-0">
-          <img
-            src="https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&q=80&w=2000"
-            alt="Firm Interior"
-            className="w-full h-full object-cover object-center grayscale brightness-[0.3] scale-105 keep-grayscale"
-          />
-          <div className="absolute inset-0 bg-[#0F1E2E]/60 backdrop-blur-[2px]"></div>
-        </div>
+      <Hero />
 
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="flex flex-col items-center mb-8 md:mb-12">
-            <span className="text-[#C6A75E] font-bold tracking-[0.6em] uppercase text-[10px] md:text-xs mb-4">
-              Counsel Without Compromise
-            </span>
-            <div className="w-12 h-px bg-[#C6A75E]/40"></div>
-          </div>
-
-          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-[#F7F5F0] mb-8 serif leading-[1.1]">
-            Elite Legal Advocacy for Complex Interests.
-          </h1>
-
-          <p className="max-w-2xl text-sm md:text-base text-[#F7F5F0]/70 font-light leading-relaxed mx-auto mb-12">
-            We provide strategic legal counsel to individuals and enterprises navigating high-stakes
-            commercial, regulatory, and private matters.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/book-consultation"
-              className="px-8 py-4 bg-[#C6A75E] text-[#0F1E2E] text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[#F7F5F0] transition-colors"
-            >
-              Book a Consultation
-            </Link>
-            <Link
-              to="/practice"
-              className="px-8 py-4 border border-[#F7F5F0]/30 text-[#F7F5F0] text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[#F7F5F0]/10 transition-colors"
-            >
-              Explore Practice Areas
-            </Link>
-          </div>
-        </div>
-      </section>
+      <AboutSection />
 
       {/* Practice Areas preview */}
       <section className="py-28">
@@ -126,7 +90,7 @@ const HomePage: React.FC = () => {
               Trusted By
             </p>
             <div className="flex flex-wrap items-center justify-center gap-12">
-              {clientLogos?.map((logo) => (
+              {clientLogos?.map((logo) =>
                 logo.websiteUrl ? (
                   <a
                     key={logo.id}
@@ -145,29 +109,17 @@ const HomePage: React.FC = () => {
                     className="h-8 md:h-10 object-contain grayscale hover:grayscale-0 transition-all opacity-60 hover:opacity-100"
                   />
                 )
-              ))}
+              )}
             </div>
           </div>
         </section>
       )}
 
-      {/* CTA Banner */}
-      <section className="py-28 bg-[#0F1E2E]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-5xl text-[#F7F5F0] font-bold serif leading-tight mb-8">
-            Ready to Discuss Your Matter?
-          </h2>
-          <p className="text-[#F7F5F0]/60 text-lg font-light leading-relaxed mb-12">
-            Schedule a confidential consultation with our team.
-          </p>
-          <Link
-            to="/book-consultation"
-            className="inline-block px-10 py-4 bg-[#C6A75E] text-[#0F1E2E] text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[#F7F5F0] transition-colors"
-          >
-            Book a Consultation
-          </Link>
-        </div>
-      </section>
+      <FAQ limit={4} />
+
+      <BlogPreview />
+
+      <ContactSection variant="white" />
     </div>
   );
 };
